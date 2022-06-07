@@ -1,0 +1,62 @@
+#REQUIRE SD
+
+isemummc = fsexists("sd:/swap/sysmmc/atmosphere")
+issysmmc = fsexists("sd:/swap/emummc/atmosphere")
+
+switchToSys = {
+    clear()
+    if(issysmmc == 1){
+        println("sysMMC is already current atmosphere folder")
+        println(" ")
+        println("Press any button to boot")
+        pause()
+        payload("sd:/bootloader/payloads/fusee.bin")
+    }.else(){
+        println("Switching to sysMMC Atmosphere folder")
+        movefile("sd:/atmosphere", "sd:/swap/emummc/atmosphere")
+        movefile("sd:/mods", "sd:/swap/emummc/mods")
+        movefile("sd:/swap/sysmmc/atmosphere", "sd:/atmosphere")
+        movefile("sd:/swap/sysmmc/mods", "sd:/mods")
+        movefile("sd:/emuMMC/emummc.ini", "sd:/swap/emummc/emummc.ini")
+        movefile("sd:/swap/sysmmc/emummc.ini", "sd:/emuMMC/emummc.ini")
+        payload("sd:/bootloader/payloads/fusee.bin")
+    }
+}
+
+switchToEmu = {
+    clear()
+    if(isemummc == 1){
+        println("emuMMC is already current atmosphere folder")
+        println(" ")
+        println("Press any button to boot")
+        pause()
+        payload("sd:/bootloader/payloads/fusee.bin")
+    }.else(){
+        println("Switching to emuMMC Atmosphere folder")
+        movefile("sd:/atmosphere", "sd:/swap/sysmmc/atmosphere")
+        movefile("sd:/mods", "sd:/swap/sysmmc/mods")
+        movefile("sd:/swap/emummc/atmosphere", "sd:/atmosphere")
+        movefile("sd:/swap/emummc/mods", "sd:/mods")
+        movefile("sd:/emuMMC/emummc.ini", "sd:/swap/sysmmc/emummc.ini")
+        movefile("sd:/swap/emummc/emummc.ini", "sd:/emuMMC/emummc.ini")
+        payload("sd:/bootloader/payloads/fusee.bin")
+    }
+}
+
+if(fsexists("sd:/swap/sysmmc/atmosphere")){
+    println("Atmosphere folder is currently emuMMC")
+    println(" ")
+}.else(){
+    println("Atmosphere folder is currently sysMMC")
+    println(" ")
+}
+
+option = menu(["emuMMC","sysMMC"], 0)
+
+println(option, "was pressed")
+
+if(option){
+    switchToSys()
+}.else(){
+    switchToEmu()
+}
